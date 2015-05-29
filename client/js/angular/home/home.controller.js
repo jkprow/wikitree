@@ -31,7 +31,7 @@
                 var linksByNodeIds = {};
 
                 var requestID = null;
-                var timeoutID = null
+                var timeoutID = null;
 
                 var limit = 200;
                 var count = 0;
