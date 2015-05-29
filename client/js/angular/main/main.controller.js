@@ -358,5 +358,341 @@
                     }
                 };
 
+                /**
+                 * Get article data
+                 * @param   {String} title
+                 * @returns {Promise} Resolves to Article data
+                 */
+                function findOrAddArticle(title) {
+
+                    // is this a category?
+                    if (title.match(/^Category:/)) {
+                        // skip to special handler
+                        return findOrAddCategory(title);
+                    }
+
+                    return Articles.getByUnsafeTitle(title).
+                        then(function (article) {
+                            return{
+                                type: 'article',
+                                name: article.title,
+                                title: article.title
+                            };
+                        }).
+                        catch(function (err) {
+                            console.log('In findOrAddArticle', err);
+                            // no result? try searching
+                            return findOrAddSearch(title);
+                        });
+                }
+
+                /**
+                 * Get category data
+                 * @param title
+                 * @returns {Promise} Resolves to category data
+                 */
+                function findOrAddCategory(title) {
+                    return Categories.getByUnsafeTitle(title).
+                        then(function (category) {
+                            return {
+                                type: 'category',
+                                name: category.title,
+                                title: category.title
+                            };
+                        }).
+                        catch(function (err) {
+                            console.log('In findOrAddCategory', err);
+                            // no result? try searching
+                            return findOrAddSearch(title);
+                        });
+                }
+
+                /**
+                 * Get search results
+                 * @param {String} query
+                 * @returns {Promise} Resolves to search results data
+                 */
+                function findOrAddSearch(query) {
+                    return Searches.getByQuery(query).
+                        then(function (search) {
+                            return {
+                                type: 'search',
+                                name: 'Search "' + query + '"',
+                                query: query
+                            };
+                        }).
+                        catch(function (err) {
+                            console.log('In findOrAddSearch', err);
+                            // no dice
+                            return null;
+                        });
+                }
+
+                /**
+                 * Find node in the current graph, add if not found
+                 * @param {Object} args see class Node for details
+                 * @param {Function} callback
+                 */
+                function findOrAddNode(args, callback) {
+                    var node = nodes.byName[args.name];
+                    if (!node) node = nodes.addNode(args);
+                    callback(node);
+                };
+
+                /**
+                 *Find link in the current graph, add if not found
+                 * @param {Node} node
+                 * @param {Number} sourceId
+                 * @param {Function} callback
+                 */
+                function findOrAddLink(node, sourceId, callback) {
+                    var targetId = node.uuid;
+
+                    // wait lol, no self-referencing nodes
+                    if (targetId === sourceId) {
+                        callback(null);
+                        return;
+                    }
+
+                    // TODO not sure where to put this
+                    // give source coords to target node
+                    var source = nodes.byId[sourceId];
+                    if ((source.x || source.y) && !(node.x || node.y)) {
+                        node.x = source.x + Utilities.makeJitter(10);
+                        node.y = source.y + Utilities.makeJitter(10);
+                    }
+
+                    var link = null;
+                    if (links.byNodeIds[sourceId] &&
+                        links.byNodeIds[sourceId][targetId]) {
+                        // grab existing link
+                        link = links.byNodeIds[sourceId][targetId];
+                    } else if (links.byNodeIds[targetId] &&
+                        links.byNodeIds[targetId][sourceId]) {
+                        // add new link, but mark as duplicate
+                        link = links.addLink(sourceId, targetId);
+                        link.linkback = true;
+                    } else {
+                        // add new link
+                        link = links.addLink(sourceId, targetId);
+                    }
+
+                    callback(link);
+                }
+
+                /**
+                 * Public interface
+                 */
+                return {
+
+                    /**
+                     * Read state
+                     */
+
+                    getCurrentNode: function () {
+                        return nodes.byId[history.currentId];
+                    },
+
+                    getNodes: function () {
+                        return nodes.arr;
+                    },
+
+                    getLinks: function () {
+                        return links.arr;
+                    },
+
+                    hasForward: function () {
+                        return !!history.nextStack.length;
+                    },
+
+                    hasBackward: function () {
+                        return !!history.prevStack.length;
+                    },
+
+                    /**
+                     * Change state
+                     */
+
+                    goForward: function () {
+                        history.goForward();
+                        $rootScope.$broadcast('update:currentnode');
+                    },
+
+                    goBackward: function () {
+                        history.goBackward();
+                        $rootScope.$broadcast('update:currentnode');
+                    },
+
+                    setCurrentNode: function (nodeId) {
+                        history.setCurrentId(nodeId);
+                        $rootScope.$broadcast('update:currentnode');
+                    },
+
+                    removeNode: function (nodeId) {
+
+                        // validate existence
+                        var node = nodes.byId[nodeId];
+                        if (!node) return;
+
+                        // remove from collections
+                        nodes.removeNode(node.uuid);
+                        links.removeByNode(node.uuid);
+                        history.removeNode(node.uuid);
+
+                        // alert the media
+                        $rootScope.$broadcast('update:nodes+links');
+                        $rootScope.$broadcast('update:currentnode');
+
+                    },
+
+                    handleTitle: function (args) {
+
+                        var startTime = Date.now();
+
+                        var title = args.title.trim();
+                        var sourceNodeId = args.sourceNodeId; // add link from this node
+                        var noSetCurrent = args.noSetCurrent; // bool, don't update current node
+
+                        // must have title to handle title
+                        if (!(title && title.length)) return;
+
+                        // 1. find or add article
+                        // 2. find or add node
+                        // 3. find or add link (?)
+                        // 4. set current node (?)
+
+                        findOrAddArticle(title).
+                            then(function (result) {
+
+                                // TODO handle failure
+                                if (!result) {
+                                    alert('Sorry, something went wrong for "' + title + '"');
+                                    return;
+                                }
+
+                                return findOrAddNode(result, function (node) {
+                                    if (sourceNodeId) {
+                                        findOrAddLink(node, sourceNodeId, function (link) {
+
+                                            $rootScope.$broadcast('update:nodes+links');
+
+                                            if (!noSetCurrent) {
+                                                history.setCurrentId(node.uuid);
+                                                $rootScope.$broadcast('update:currentnode');
+                                            }
+
+                                            var endTime = Date.now();
+                                            console.log('handleTitle complete: ', endTime - startTime);
+
+                                        });
+                                    } else {
+
+                                        $rootScope.$broadcast('update:nodes+links');
+
+                                        if (!noSetCurrent) {
+                                            history.setCurrentId(node.uuid);
+                                            $rootScope.$broadcast('update:currentnode');
+                                        }
+
+                                        var endTime = Date.now();
+                                        console.log('handleTitle complete: ', endTime - startTime);
+
+                                    }
+                                });
+                            });
+                    },
+
+                    handleTitleSearch: function (args) {
+
+                        // identical to handleTitle
+                        // EXCEPT skips straight to search results
+
+                        var startTime = Date.now();
+
+                        var title = args.title.trim();
+                        var sourceNodeId = args.sourceNodeId; // add link from this node
+                        var noSetCurrent = args.noSetCurrent; // bool, don't update current node
+
+                        // must have title to handle title
+                        if (!(title && title.length)) return;
+
+                        // 1. find or add article
+                        // 2. find or add node
+                        // 3. find or add link (?)
+                        // 4. set current node (?)
+
+                        findOrAddSearch(title).
+                            then(function (result) {
+
+                                // TODO handle failure
+                                if (!result) {
+                                    alert('Sorry, something went wrong for "' + title + '"');
+                                    return;
+                                }
+
+                                return findOrAddNode(result, function (node) {
+                                    if (sourceNodeId) {
+                                        findOrAddLink(node, sourceNodeId, function (link) {
+
+                                            $rootScope.$broadcast('update:nodes+links');
+
+                                            if (!noSetCurrent) {
+                                                history.setCurrentId(node.uuid);
+                                                $rootScope.$broadcast('update:currentnode');
+                                            }
+
+                                            var endTime = Date.now();
+                                            console.log('handleTitleSearch complete: ', endTime - startTime);
+
+                                        });
+                                    } else {
+
+                                        $rootScope.$broadcast('update:nodes+links');
+
+                                        if (!noSetCurrent) {
+                                            history.setCurrentId(node.uuid);
+                                            $rootScope.$broadcast('update:currentnode');
+                                        }
+
+                                        var endTime = Date.now();
+                                        console.log('handleTitleSearch complete: ', endTime - startTime);
+
+                                    }
+                                });
+                            });
+                    },
+
+                    /**
+                     * Manage state
+                     */
+
+                    importState: function(session) {
+                        session = session.data;
+
+                        history.importState(session.history);
+                        nodes.importState(session.nodes);
+                        links.importState(session.links);
+
+                        $rootScope.$broadcast('update:nodes+links');
+                        $rootScope.$broadcast('update:currentnode');
+                    },
+
+                    exportState: function() {
+                        return {
+                            history: history.exportState(),
+                            nodes: nodes.exportState(),
+                            links: links.exportState()
+                        }
+                    },
+
+                    clearState: function() {
+                        history.clearState();
+                        nodes.clearState();
+                        links.clearState();
+
+                        $rootScope.$broadcast('update:nodes+links');
+                    }
+                };
+
             }]);
 })();
