@@ -161,7 +161,7 @@
 
                     // if deleted only session:
                     if (Sessions.index.length == 0) {
-                        window.location = '/';
+                        window.location = '/welcome';
                     // if deleted active session that was last:
                     } else if (idx == Sessions.active) {
                         var uuid;
