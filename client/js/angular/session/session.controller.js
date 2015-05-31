@@ -24,12 +24,13 @@
                 session.next_stack        = init_session.data.next_stack;
 
                 session.nodes             = init_session.data.nodes;
-                session.nodes_by_id       = init_session.data.nodes_by_id;
-                session.nodes_by_name     = init_session.data.nodes_by_name;
+                session.nodes_by_id       = {}; //init_session.data.nodes_by_id;
+                session.nodes_by_name     = {}; //init_session.data.nodes_by_name;
 
                 session.links             = init_session.data.links;
-                session.links_by_id       = init_session.data.links_by_id;
-                session.links_by_node_ids = init_session.data.links_by_node_ids;
+                session.links_by_id       = {}; //init_session.data.links_by_id;
+                session.links_by_node_ids = {}; //init_session.data.links_by_node_ids;
+
 
                 $rootScope.$broadcast('update:nodes+links');
                 $rootScope.$broadcast('update:currentnode');
@@ -54,11 +55,11 @@
                         prev_stack:        session.prev_stack,
                         next_stack:        session.next_stack,
                         nodes:             session.nodes,
-                        nodes_by_id:       session.nodes_by_id,
-                        nodes_by_name:     session.nodes_by_name,
-                        links:             session.links,
-                        links_by_id:       session.links_by_id,
-                        links_by_node_ids: session.links_by_node_ids
+                        //nodes_by_id:       session.nodes_by_id,
+                        //nodes_by_name:     session.nodes_by_name,
+                        links:             session.links //,
+                        //links_by_id:       session.links_by_id,
+                        //links_by_node_ids: session.links_by_node_ids
                     })
                 };
 
@@ -159,6 +160,27 @@
                     session.do_search(init_session.start);
                     session.new = false;
                 }
+
+                session.nodes.forEach(function (node) {
+                    console.log('rebuild nodes');
+                    session.nodes.forEach(function (node) {
+                        session.nodes_by_id[node.uuid] = node;
+                        session.nodes_by_name[node.uuid] = node;
+
+                    })
+                });
+
+                session.links.forEach(function (link) {
+                    console.log('rebuild lynx');
+                    var sourceId = link.sourceId;
+                    var targetId = link.targetId;
+                    link.source = session.nodes_by_id[sourceId];
+                    link.target = session.nodes_by_id[targetId];
+                    session.links_by_id[link.uuid] = link;
+                    if (!session.links_by_node_ids[sourceId]) session.links_by_node_ids[sourceId] = {};
+                    session.links_by_node_ids[sourceId][targetId] = link;
+                });
+
 
                 session.link = function (tgt_node, src_node_id) {
                     var tgt_node_id = tgt_node.uuid;
