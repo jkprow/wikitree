@@ -79,6 +79,7 @@
                 };
 
                 Sessions.new = function (name) {
+                    //debugger
                     Sessions.active = 0;
 
                     var session = new Session(name);
@@ -88,6 +89,7 @@
                     localStorageService.set('index', Sessions.index);
                     localStorageService.set('active', Sessions.active);
 
+                    $location.path('/'+session.uuid);
                     return session;
                 };
 

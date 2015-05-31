@@ -101,20 +101,23 @@
                     this.linkback = false;
                     // d3 force graph attributes
                     // https://github.com/mbostock/d3/wiki/Force-Layout#links
-                    this.source = nodes.byId[this.sourceId];
-                    this.target = nodes.byId[this.targetId];
+                    this.source = session.nodes_by_id[this.sourceId];
+                    this.target = session.nodes_by_id[this.targetId];
                 }
 
 
                 // the big one
 
-                session.do_search = function(title, src_node_id, set_current) {
+                session.do_search = function(title, src_node_id, no_set_current) {
                     var start_time = Date.now();
 
                     if (!(title && title.length)) return;
 
                     Search.findOrAddArticle(title).
                         then(function (result) {
+                            debugger
+
+                            console.log(result);
 
                             // no result?
                             if (!result) {
@@ -127,14 +130,16 @@
                                      ?  session.nodes_by_name[result.name]
                                      :  session.add_node(result);
 
+                            console.log(node);
+
                             // does our node need to be linked?
                             if (src_node_id) {
-                                sessions.link(node, src_node_id);
+                                session.link(node, src_node_id);
                             }
 
                             $rootScope.$broadcast('update:nodes+links');
 
-                            if (set_current) {
+                            if (!no_set_current) {
                                 session.set_current_node_id(node.uuid);
                                 $rootScope.$broadcast('update:currentnode');
                             }
@@ -160,8 +165,8 @@
 
                     var src_node = session.nodes_by_id[src_node_id];
                     if ((src_node.x || src_node.y) && !(tgt_node.x || tgt_node.y)) {
-                        tgt_node.x = src.x + Utilities.makeJitter(10);
-                        tgt_node.y = src.y + Utilities.makeJitter(10);
+                        tgt_node.x = src_node.x + Utilities.makeJitter(10);
+                        tgt_node.y = src_node.y + Utilities.makeJitter(10);
                     }
 
                     if (session.links_by_node_ids[src_node_id] &&
@@ -268,7 +273,7 @@
                     session.nodes.push(node);
                     session.nodes_by_id[node.uuid] = node;
                     session.nodes_by_name[node.name] = node;
-                    //return node;
+                    return node;
                 };
 
                 session.add_link = function (source_id, target_id, linkback) {
