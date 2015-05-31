@@ -137,12 +137,19 @@
                 //};
 
                 Sessions.restore = function (uuid) {
-                    Sessions.active = Sessions.index.
+                    var session = localStorageService.get(uuid);
+
+                    if (!session) $location.path('/');
+
+                    // LOL
+                    Sessions.active = Sessions.index.indexOf(Sessions.index.
                         filter(function (session) {
                             return session.uuid === uuid
-                        })[0];
+                        })[0]);
 
-                    return localStorageService.get(uuid);
+                    console.log('active session', Sessions.active);
+
+                    return session;
                 };
 
                 Sessions.delete = function (idx) {

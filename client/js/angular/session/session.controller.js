@@ -31,6 +31,9 @@
                 session.links_by_id       = init_session.data.links_by_id;
                 session.links_by_node_ids = init_session.data.links_by_node_ids;
 
+                $rootScope.$broadcast('update:nodes+links');
+                $rootScope.$broadcast('update:currentnode');
+
 
                 // back up before route changes
                 $scope.$on('$routeChangeStart', function() {
@@ -115,7 +118,7 @@
 
                     Search.findOrAddArticle(title).
                         then(function (result) {
-                            debugger
+                            //debugger
 
                             console.log(result);
 
