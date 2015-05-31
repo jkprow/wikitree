@@ -17,6 +17,36 @@
             }
 
             function getFromAPI(title) {
+                console.log('Getting article from API...', title);
+                var timestamp = Date.now();
+                $rootScope.$broadcast('mediawikiapi:loadstart', timestamp);
+
+                return $http.jsonp('https://en.wikipedia.org/w/api.php', {
+                    params: {
+                        action: 'parse',
+                        prop: 'text|categorieshtml|displaytitle',
+                        redirects: 'true',
+                        page: title,
+                        format: 'json',
+                        callback: 'JSON_CALLBACK'
+                    }
+
+                }).then(function (data) {
+                    $rootScope.$broadcast('mediawikiapi:loadend', timestamp);
+                    if (data && data.parse && data.parse.title) {
+                        return data.parse;
+                    } else {
+                        throw "Article API error";
+                    }
+
+                }).catch(function (err) {
+                    console.error(err);
+                });
+
+
+            }
+
+            /*function getFromAPI(title) {
 
                 console.log('Getting article from API...', title);
 
@@ -48,7 +78,7 @@
                             reject(null);
                         });
                 });
-            }
+            }*/
 
             /**
              * Public
@@ -87,6 +117,7 @@
                 });
             };
 
+            // JUST for user input
             Articles.getByUnsafeTitle = function (unsafeTitle) {
                 return $q(function (resolve, reject) {
                     if (byUnsafeTitle[unsafeTitle]) {
@@ -103,7 +134,11 @@
                                     });
                                     byUnsafeTitle[unsafeTitle] = article;
                                     byTitle[article.title] = article;
-                                    resolve(article);
+                                    resolve({
+                                        type: 'article',
+                                        name: article.title,
+                                        title: article.title
+                                    });
                                 } else {
                                     // sucks
                                     console.error('Article not found!', unsafeTitle);

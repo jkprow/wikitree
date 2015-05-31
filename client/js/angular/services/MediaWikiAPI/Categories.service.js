@@ -155,6 +155,7 @@
                 });
             };
 
+            // JUST for user input
             Categories.getByUnsafeTitle = function (unsafeTitle) {
                 return $q(function (resolve, reject) {
                     if (byUnsafeTitle[unsafeTitle]) {
@@ -174,7 +175,11 @@
                                     });
                                     byUnsafeTitle[unsafeTitle] = category;
                                     byTitle[category.title] = category;
-                                    resolve(category);
+                                    resolve({
+                                        type: 'category',
+                                        name: category.title,
+                                        title: category.title
+                                    });
                                 } else {
                                     // sucks
                                     console.error('Category not found!', unsafeTitle);
