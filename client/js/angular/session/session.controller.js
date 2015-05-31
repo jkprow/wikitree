@@ -1,10 +1,18 @@
 (function() {
-    angular.module('wikitree.main').
+    angular.module('wikitree.session').
 
-        controller('mainController', ['$scope', 'Search', 'init_session',
-            function($scope, Search, init_session) {
+        controller('session_controller',
+            ['$scope'
+            ,'$rootScope'
+            ,'Search'
+            ,'Sessions'
+            ,'Utilities'
+            ,'init_session'
+            ,function($scope, $rootScope, Search, Sessions, Utilities, init_session) {
 
                 var session = this;
+
+                session.message = "hello!";
 
                 /**
                  * Session state
@@ -26,6 +34,18 @@
 
                 // back up before route changes
                 $scope.$on('$routeChangeStart', function() {
+                    session.save();
+                });
+
+                $rootScope.$on('update:nodes+links', function () {
+                    session.save();
+                });
+
+                $(window).on('beforeunload', function () {
+                    session.save();
+                });
+
+                session.save = function () {
                     Sessions.save(session.id, {
                         current_node_id:   session.current_node_id,
                         prev_stack:        session.prev_stack,
@@ -37,7 +57,7 @@
                         links_by_id:       session.links_by_id,
                         links_by_node_ids: session.links_by_node_ids
                     })
-                });
+                };
 
                 /**
                  * Create a node object
@@ -86,14 +106,6 @@
                 }
 
 
-                /**
-                 * Initialize the session if new
-                 */
-                if (init_session.new) {
-                    session.do_search(init_session.start);
-                    session.new = false;
-                }
-
                 // the big one
 
                 session.do_search = function(title, src_node_id, set_current) {
@@ -113,7 +125,7 @@
                             // should we make a new node or get an existing one?
                             var node = (session.nodes_by_name[result.name])
                                      ?  session.nodes_by_name[result.name]
-                                     :  sessions.addNode(result);
+                                     :  session.add_node(result);
 
                             // does our node need to be linked?
                             if (src_node_id) {
@@ -131,6 +143,14 @@
                             console.log('handleTitle complete: ', end_time - start_time);
                         });
                 };
+
+                /**
+                 * Initialize the session if new
+                 */
+                if (init_session.new) {
+                    session.do_search(init_session.start);
+                    session.new = false;
+                }
 
                 session.link = function (tgt_node, src_node_id) {
                     var tgt_node_id = tgt_node.uuid;
@@ -155,10 +175,10 @@
                         // add new link, but mark as duplicate
 
                         // add node with linkback
-                        links.addLink(src_node_id, tgt_node_id, true);
+                        session.add_link(src_node_id, tgt_node_id, true);
                     } else {
                         // add node WITHOUT linkback
-                        links.addLink(src_node_id, tgt_node_id, false);
+                        session.add_link(src_node_id, tgt_node_id, false);
                     }
                 };
 
@@ -168,7 +188,7 @@
 
                 // just get this directly?
                 session.get_current_node = function () {
-                    return sessions.nodes_by_id[session.current_node_id];
+                    return session.nodes_by_id[session.current_node_id];
                 };
 
                 // just get this directly?
@@ -240,28 +260,28 @@
 
                 session.add_node = function (args) {
                     var node = new Node({
-                        type: args.type,
-                        name: args.name,
+                        type:  args.type,
+                        name:  args.name,
                         title: args.title,
                         query: args.query
                     });
-                    nodes.arr.push(node);
-                    nodes.byId[node.uuid] = node;
-                    nodes.byName[node.name] = node;
+                    session.nodes.push(node);
+                    session.nodes_by_id[node.uuid] = node;
+                    session.nodes_by_name[node.name] = node;
                     //return node;
                 };
 
-                session.add_link = function (sourceId, targetId, linkback) {
+                session.add_link = function (source_id, target_id, linkback) {
                     var link = new Link({
-                        sourceId: sourceId,
-                        targetId: targetId,
+                        sourceId: source_id,
+                        targetId: target_id,
                         linkback: linkback
                     });
-                    links.arr.push(link);
-                    if (!links.byNodeIds[sourceId]) links.byNodeIds[sourceId] = {};
-                    links.byNodeIds[sourceId][targetId] = link;
-                    links.byId[link.uuid] = link;
-                    return link;
+                    session.links.push(link);
+                    if (!session.links_by_node_ids[source_id]) session.links_by_node_ids[source_id] = {};
+                    session.links_by_node_ids[source_id][target_id] = link;
+                    session.links_by_id[link.uuid] = link;
+                    //return link;
                 };
 
                 /**
@@ -679,36 +699,36 @@
 
 
 
-                    /**
-                     * Manage state
-                     */
-
-                    importState: function(session) {
-                        session = session.data;
-
-                        history.importState(session.history);
-                        nodes.importState(session.nodes);
-                        links.importState(session.links);
-
-                        $rootScope.$broadcast('update:nodes+links');
-                        $rootScope.$broadcast('update:currentnode');
-                    },
-
-                    exportState: function() {
-                        return {
-                            history: history.exportState(),
-                            nodes: nodes.exportState(),
-                            links: links.exportState()
-                        }
-                    },
-
-                    clearState: function() {
-                        history.clearState();
-                        nodes.clearState();
-                        links.clearState();
-
-                        $rootScope.$broadcast('update:nodes+links');
-                    }
+                    ///**
+                    // * Manage state
+                    // */
+                    //
+                    //importState: function(session) {
+                    //    session = session.data;
+                    //
+                    //    history.importState(session.history);
+                    //    nodes.importState(session.nodes);
+                    //    links.importState(session.links);
+                    //
+                    //    $rootScope.$broadcast('update:nodes+links');
+                    //    $rootScope.$broadcast('update:currentnode');
+                    //},
+                    //
+                    //exportState: function() {
+                    //    return {
+                    //        history: history.exportState(),
+                    //        nodes: nodes.exportState(),
+                    //        links: links.exportState()
+                    //    }
+                    //},
+                    //
+                    //clearState: function() {
+                    //    history.clearState();
+                    //    nodes.clearState();
+                    //    links.clearState();
+                    //
+                    //    $rootScope.$broadcast('update:nodes+links');
+                    //}
 
 
 
