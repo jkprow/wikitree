@@ -35,6 +35,8 @@
 
                 // handle model update (nodes + links)
                 $scope.$on('update:nodes+links', function () {
+
+                    console.log('did the thing');
                 	//var nodes = CurrentSession.getNodes().slice();
                     //var links = CurrentSession.getLinks().slice();
                     var nodes = $scope.session.nodes.slice();

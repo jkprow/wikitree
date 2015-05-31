@@ -28,6 +28,10 @@
                         }]
                     }
                 }).
+                when('/welcome', {
+                    templateUrl: '/js/angular/home/home.template.html',
+                    controller: 'home_controller'
+                }).
                 when('/session/:uuid', {
                     templateUrl: '/js/angular/session/session.template.html',
                     controller: 'session_controller',

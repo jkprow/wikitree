@@ -31,9 +31,13 @@
                 session.links_by_id       = {}; //init_session.data.links_by_id;
                 session.links_by_node_ids = {}; //init_session.data.links_by_node_ids;
 
+                setTimeout(function(){
+                    $scope.$apply(function(){
+                        $scope.$broadcast('update:nodes+links');
+                        $scope.$broadcast('update:currentnode');
+                    });
+                }, 1000);
 
-                $rootScope.$broadcast('update:nodes+links');
-                $rootScope.$broadcast('update:currentnode');
 
 
                 // back up before route changes
@@ -162,12 +166,9 @@
                 }
 
                 session.nodes.forEach(function (node) {
-                    console.log('rebuild nodes');
-                    session.nodes.forEach(function (node) {
-                        session.nodes_by_id[node.uuid] = node;
-                        session.nodes_by_name[node.uuid] = node;
+                    session.nodes_by_id[node.uuid] = node;
+                    session.nodes_by_name[node.uuid] = node;
 
-                    })
                 });
 
                 session.links.forEach(function (link) {

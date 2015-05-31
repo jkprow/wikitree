@@ -23,10 +23,10 @@
 
                 $scope.open = false;
 
-                //$scope.goHome = function() {
-                //    Sessions.save();
-                //    $location.path('/');
-                //};
+                $scope.goHome = function() {
+                    //Sessions.save();
+                    $location.path('/welcome');
+                };
 
                 $scope.toggleMenu = function () {
                     $scope.open = !$scope.open;
@@ -54,10 +54,10 @@
 
                 $scope.removeCurrentNode = function () {
                     //var node = CurrentSession.getCurrentNode();
-                    var node = session.get_current_node();
+                    var node = $scope.session.get_current_node();
                     if (window.confirm('Remove the article "' + node.title + '" from your session?')) {
                         //CurrentSession.removeNode(node.uuid);
-                        session.remove_node(node.uuid);
+                        $scope.session.remove_node(node.uuid);
                     }
                 };
 
