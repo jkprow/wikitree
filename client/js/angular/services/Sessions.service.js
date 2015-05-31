@@ -16,11 +16,11 @@
                         prev_stack:        [],
                         next_stack:        [],
                         nodes:             [],
-                        nodes_by_id:       {},
-                        nodes_by_name:     {},
-                        links:             [],
-                        links_by_id:       {},
-                        links_by_node_ids: {}
+                        //nodes_by_id:       {},
+                        //nodes_by_name:     {},
+                        links:             []//,
+                        //links_by_id:       {},
+                        //links_by_node_ids: {}
                     }
                 }
 
