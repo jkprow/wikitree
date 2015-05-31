@@ -1,7 +1,7 @@
 (function() {
-    angular.module('wikitree.search').
+    angular.module('wikitree').
 
-        factory('Search', ['$http', 'Articles', 'Categores', 'Searches',
+        factory('Search', ['$http', 'Articles', 'Categories', 'Searches',
             function($http, Articles, Categories, Searches) {
                 var search = {};
 

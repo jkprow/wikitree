@@ -1,5 +1,5 @@
 (function() {
-    angular.module('wikitree.main.menu.session').
+    angular.module('wikitree.session.menu.session_tile').
 
         controller('sessionController', ['$scope', 'Sessions', function($scope, Sessions) {
 

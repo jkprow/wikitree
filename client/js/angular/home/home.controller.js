@@ -1,7 +1,7 @@
 (function() {
     angular.module('wikitree.home').
 
-        controller('homeController', ['$scope', '$location', 'Utilities',
+        controller('home_controller', ['$scope', '$location', 'Utilities',
             function($scope, $location, Utilities) {
 
                 var $graph = $('#home-graph');

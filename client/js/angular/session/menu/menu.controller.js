@@ -1,5 +1,5 @@
 (function() {
-    angular.module('wikitree.main.menu').
+    angular.module('wikitree.session.menu').
 
         controller('menuController', [
             '$rootScope',
@@ -7,12 +7,11 @@
             '$location',
             'Search',
             'Sessions',
-            'CurrentSession',
-            function($rootScope, $scope, $location, Search, Sessions, CurrentSession) {
+            function($rootScope, $scope, $location, Search, Sessions) {
 
-                if (Search.term === '') {
-                    Sessions.restore(Sessions.active);
-                }
+                //if (Search.term === '') {
+                //    Sessions.restore(Sessions.active);
+                //}
 
                 $scope.sessions = Sessions.index;
                 $scope.active = Sessions.active;
@@ -24,10 +23,10 @@
 
                 $scope.open = false;
 
-                $scope.goHome = function() {
-                    Sessions.save();
-                    $location.path('/');
-                };
+                //$scope.goHome = function() {
+                //    Sessions.save();
+                //    $location.path('/');
+                //};
 
                 $scope.toggleMenu = function () {
                     $scope.open = !$scope.open;
@@ -47,16 +46,18 @@
                         });
                         console.log('index', ui.item.sortable.index, 'moved to', ui.item.sortable.dropindex);
                     }
-                }
+                };
 
                 $scope.toggleNodePin = function () {
                     $rootScope.$broadcast('request:graph:toggle_node_pin');
                 };
 
                 $scope.removeCurrentNode = function () {
-                    var node = CurrentSession.getCurrentNode();
+                    //var node = CurrentSession.getCurrentNode();
+                    var node = session.get_current_node();
                     if (window.confirm('Remove the article "' + node.title + '" from your session?')) {
-                        CurrentSession.removeNode(node.uuid);
+                        //CurrentSession.removeNode(node.uuid);
+                        session.remove_node(node.uuid);
                     }
                 };
 

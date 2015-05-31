@@ -175,11 +175,7 @@
                                     });
                                     byUnsafeTitle[unsafeTitle] = category;
                                     byTitle[category.title] = category;
-                                    resolve({
-                                        type: 'category',
-                                        name: category.title,
-                                        title: category.title
-                                    });
+                                    resolve(category);
                                 } else {
                                     // sucks
                                     console.error('Category not found!', unsafeTitle);

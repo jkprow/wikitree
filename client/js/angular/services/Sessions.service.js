@@ -5,10 +5,9 @@
             '$location',
             'localStorageService',
             'Utilities',
-            'CurrentSession',
-            function($rootScope, $location, localStorageService, Utilities, CurrentSession) {
+            function($rootScope, $location, localStorageService, Utilities) {
 
-                function Session(term) {
+                function Session (term) {
                     this.new = true;
                     this.start = term;
                     this.uuid = Utilities.makeUUID();
@@ -25,7 +24,7 @@
                     }
                 }
 
-                function SessionIndex(session, name) {
+                function SessionIndex (session, name) {
                     this.uuid = session.uuid;
                     this.name = name;
                     this.rename = name;
@@ -56,44 +55,88 @@
                     }
                 });
 
-                Sessions.new = function(name) {
+                //Sessions.new = function(name) {
+                //    Sessions.active = 0;
+                //
+                //    var newSession = new Session();
+                //    Sessions.index.unshift(new SessionIndex(newSession, name));
+                //
+                //    localStorageService.set(newSession.uuid, newSession);
+                //    localStorageService.set('index', Sessions.index);
+                //    localStorageService.set('active', Sessions.active);
+                //
+                //    CurrentSession.clearState();
+                //};
+
+                Sessions.is_new = function () {
+                    if (Sessions.index.length !== 0) {
+                        var uuid = Sessions.index[Sessions.active].uuid;
+                        $location.path('/session/'+uuid);
+                        return false;
+                    } else {
+                        return true;
+                    }
+                };
+
+                Sessions.new = function (name) {
                     Sessions.active = 0;
 
-                    var newSession = new Session();
-                    Sessions.index.unshift(new SessionIndex(newSession, name));
+                    var session = new Session(name);
+                    Sessions.index.unshift(new SessionIndex(session, name));
 
-                    localStorageService.set(newSession.uuid, newSession);
+                    localStorageService.set(session.uuid, session);
                     localStorageService.set('index', Sessions.index);
                     localStorageService.set('active', Sessions.active);
 
-                    CurrentSession.clearState();
+                    return session;
                 };
 
-                Sessions.save = function() {
-                    var currentSessionUUID = Sessions.index[Sessions.active].uuid;
-                    var currentSession = localStorageService.get(currentSessionUUID);
+                //Sessions.save = function() {
+                //    var currentSessionUUID = Sessions.index[Sessions.active].uuid;
+                //    var currentSession = localStorageService.get(currentSessionUUID);
+                //
+                //    currentSession.data = CurrentSession.exportState();
+                //    localStorageService.set(currentSessionUUID, currentSession);
+                //
+                //    Sessions.index[Sessions.active].date = Date.now();
+                //    localStorageService.set('index', Sessions.index);
+                //    localStorageService.set('active', Sessions.active);
+                //};
 
-                    currentSession.data = CurrentSession.exportState();
-                    localStorageService.set(currentSessionUUID, currentSession);
+                Sessions.save = function (uuid, data) {
+                    var session = localStorageService.get(uuid);
+
+                    session.new = false;
+                    session.data = data;
 
                     Sessions.index[Sessions.active].date = Date.now();
                     localStorageService.set('index', Sessions.index);
-                    localStorageService.set('active', Sessions.active);
+
+                    localStorageService.set(uuid, session);
                 };
 
-                Sessions.restore = function(idx) {
-                    Sessions.active = idx;
-                    localStorageService.set('active', Sessions.active);
-                    console.log('clicked', idx, Sessions.index[idx]);
+                //Sessions.restore = function(idx) {
+                //    Sessions.active = idx;
+                //    localStorageService.set('active', Sessions.active);
+                //    console.log('clicked', idx, Sessions.index[idx]);
+                //
+                //    var restoredSessionUUID = Sessions.index[idx].uuid;
+                //    var restoredSession = localStorageService.get(restoredSessionUUID);
+                //
+                //    CurrentSession.clearState();
+                //    CurrentSession.importState(restoredSession);
+                //};
 
-                    var restoredSessionUUID = Sessions.index[idx].uuid;
-                    var restoredSession = localStorageService.get(restoredSessionUUID);
+                Sessions.restore = function (uuid) {
+                    Sessions.active = Sessions.index.
+                        filter(function (session) {
+                            return session.uuid === uuid
+                        })[0];
 
-                    CurrentSession.clearState();
-                    CurrentSession.importState(restoredSession);
+                    return localStorageService.get(uuid);
                 };
 
-                Sessions.delete = function(idx) {
+                Sessions.delete = function (idx) {
                     var deletedSessionUUID = Sessions.index[idx].uuid;
                     localStorageService.remove(deletedSessionUUID);
 
@@ -105,11 +148,15 @@
                         window.location = '/';
                     // if deleted active session that was last:
                     } else if (idx == Sessions.active) {
+                        var uuid;
                         if (idx == Sessions.index.length) {
-                            Sessions.restore(idx - 1);
+                            //Sessions.restore(idx - 1);          // won't work anymore
+                            uuid = Sessions.index[idx-1].uuid;
                         } else {
-                            Sessions.restore(idx);
+                            //Sessions.restore(idx);              // won't work anymore
+                            uuid = Sessions.index[idx].uuid;
                         }
+                        $location.path('/session/'+uuid);
                     // if deleted session above active
                     } else if (idx < Sessions.active) {
                         Sessions.active--;
@@ -120,13 +167,13 @@
                  * Save events
                  */
 
-                $(window).on('beforeunload', function () {
-                    Sessions.save();
-                });
-
-                $rootScope.$on('update:nodes+links', function () {
-                    Sessions.save();
-                });
+                //$(window).on('beforeunload', function () {
+                //    Sessions.save();
+                //});
+                //
+                //$rootScope.$on('update:nodes+links', function () {
+                //    Sessions.save();
+                //});
 
                 return Sessions;
         }]);
