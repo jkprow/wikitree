@@ -24,6 +24,8 @@
                  *         - force graph
                  *
                  */
+                    var session = this;
+
 
                 var history;
                 var nodes;
@@ -337,6 +339,10 @@
 
                 function findOrAddLink(node, sourceId, callback) {
                     var targetId = node.uuid;
+
+                    /*
+                     * No linking if source IS target (same node)
+                     */
 
                     // wait lol, no self-referencing nodes
                     if (targetId === sourceId) {

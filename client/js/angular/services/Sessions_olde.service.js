@@ -8,20 +8,12 @@
             'CurrentSession',
             function($rootScope, $location, localStorageService, Utilities, CurrentSession) {
 
-                function Session(term) {
-                    this.new = true;
-                    this.start = term;
+                function Session() {
                     this.uuid = Utilities.makeUUID();
                     this.data = {
-                        current_node_id:   undefined,
-                        prev_stack:        [],
-                        next_stack:        [],
-                        nodes:             [],
-                        nodes_by_id:       {},
-                        nodes_by_name:     {},
-                        links:             [],
-                        links_by_id:       {},
-                        links_by_node_ids: {}
+                        history: {},
+                        nodes: {},
+                        links: {}
                     }
                 }
 
@@ -84,7 +76,7 @@
                 Sessions.restore = function(idx) {
                     Sessions.active = idx;
                     localStorageService.set('active', Sessions.active);
-                    console.log('Sessions.restore', idx, Sessions.index[idx]);
+                    console.log('clicked', idx, Sessions.index[idx]);
 
                     var restoredSessionUUID = Sessions.index[idx].uuid;
                     var restoredSession = localStorageService.get(restoredSessionUUID);

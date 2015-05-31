@@ -27,6 +27,7 @@
                 when('/session/:uuid', {
                     templateUrl: 'js/angular/session/session.template.html',
                     controller: 'session_controller',
+                    controllerAs: 'session',
                     resolve: {
                         init_state: ['Sessions', '$route', function(Sessions, $route) {
                             return Sessions.restore($route.current.params.uuid);
