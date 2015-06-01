@@ -11,6 +11,7 @@
             ,function($scope, $rootScope, Search, Sessions, Utilities, init_session) {
 
                 var session = this;
+                //debugger
 
                 session.message = "hello!";
 
@@ -36,7 +37,7 @@
                         $scope.$broadcast('update:nodes+links');
                         $scope.$broadcast('update:currentnode');
                     });
-                }, 1000);
+                }, 1);
 
 
 
@@ -106,7 +107,7 @@
                     this.uuid = args.uuid || Utilities.makeUUID();
                     this.sourceId = args.sourceId;
                     this.targetId = args.targetId;
-                    this.linkback = false;
+                    this.linkback = args.linkback;
                     // d3 force graph attributes
                     // https://github.com/mbostock/d3/wiki/Force-Layout#links
                     this.source = session.nodes_by_id[this.sourceId];
@@ -123,7 +124,6 @@
 
                     Search.findOrAddArticle(title).
                         then(function (result) {
-                            //debugger
 
                             console.log(result);
 
@@ -145,15 +145,18 @@
                                 session.link(node, src_node_id);
                             }
 
-                            $rootScope.$broadcast('update:nodes+links');
+                            $scope.$broadcast('update:nodes+links');
 
                             if (!no_set_current) {
                                 session.set_current_node_id(node.uuid);
-                                $rootScope.$broadcast('update:currentnode');
+                                $scope.$broadcast('update:currentnode');
                             }
 
                             var end_time = Date.now();
                             console.log('handleTitle complete: ', end_time - start_time);
+                        }).
+                        catch(function (err) {
+                            console.log('oh fuck', err);
                         });
                 };
 
@@ -161,6 +164,7 @@
                  * Initialize the session if new
                  */
                 if (init_session.new) {
+                    console.log('init new session', init_session);
                     session.do_search(init_session.start);
                     session.new = false;
                 }

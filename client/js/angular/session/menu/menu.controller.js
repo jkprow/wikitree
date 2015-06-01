@@ -25,7 +25,7 @@
 
                 $scope.goHome = function() {
                     //Sessions.save();
-                    $location.path('/welcome');
+                    window.location = '/welcome';
                 };
 
                 $scope.toggleMenu = function () {
