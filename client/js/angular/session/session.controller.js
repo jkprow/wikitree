@@ -33,7 +33,7 @@
                 session.links_by_id       = {}; //init_session.data.links_by_id;
                 session.links_by_node_ids = {}; //init_session.data.links_by_node_ids;
 
-                setInterval(function(){
+                setTimeout(function(){
                     $scope.$apply(function(){
                         $scope.$broadcast('update:nodes+links');
                         $scope.$broadcast('update:currentnode');
