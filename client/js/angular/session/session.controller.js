@@ -2,13 +2,14 @@
     angular.module('wikitree.session').
 
         controller('session_controller',
-            ['$scope'
+            ['$timeout'
+            ,'$scope'
             ,'$rootScope'
             ,'Search'
             ,'Sessions'
             ,'Utilities'
             ,'init_session'
-            ,function($scope, $rootScope, Search, Sessions, Utilities, init_session) {
+            ,function($timeout, $scope, $rootScope, Search, Sessions, Utilities, init_session) {
 
                 var session = this;
                 //debugger
@@ -32,7 +33,7 @@
                 session.links_by_id       = {}; //init_session.data.links_by_id;
                 session.links_by_node_ids = {}; //init_session.data.links_by_node_ids;
 
-                setTimeout(function(){
+                setInterval(function(){
                     $scope.$apply(function(){
                         $scope.$broadcast('update:nodes+links');
                         $scope.$broadcast('update:currentnode');
@@ -41,15 +42,22 @@
 
 
 
-                // back up before route changes
-                $scope.$on('$routeChangeStart', function() {
+                // handle scope destroy
+                $scope.$on('$destroy', function() {
+                    session.save()
+                });
+
+                // handle route change
+                $scope.$on('$routeChangeEnd', function() {
                     session.save();
                 });
 
-                $rootScope.$on('update:nodes+links', function () {
+                // handle graph update
+                $scope.$on('update:nodes+links', function () {
                     session.save();
                 });
 
+                // handle window close
                 $(window).on('beforeunload', function () {
                     session.save();
                 });
