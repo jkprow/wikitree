@@ -89,7 +89,9 @@
                     localStorageService.set('index', Sessions.index);
                     localStorageService.set('active', Sessions.active);
 
-                    $location.path('/'+session.uuid);
+                    console.log('new session', session.uuid);
+
+                    $location.path('/session/'+session.uuid);
                     return session;
                 };
 
@@ -138,6 +140,8 @@
 
                 Sessions.restore = function (uuid) {
                     var session = localStorageService.get(uuid);
+
+                    console.log('restored session', session);
 
                     if (!session) $location.path('/');
 
