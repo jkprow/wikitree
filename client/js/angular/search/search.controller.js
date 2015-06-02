@@ -4,45 +4,31 @@
         controller('searchController', ['$scope', '$location', 'Search',
             function($scope, $location, Search) {
 
-                $scope.search = Search;
                 $scope.inputText = '';
+
+                $scope.get_suggestions = function (term) {
+                    return Search.get_suggestions(term);
+                };
 
                 $scope.tryEnter = function ($event) {
                     if ($event.keyCode === 13) {
-                        $scope.goToArticle();
+                        $scope.start_search();
                     }
                 };
 
-                $scope.goToArticle = function (isButton) {
-                    if ($scope.inputText) {
+                $scope.start_search = function () {
+                    var term = $scope.inputText;
 
-                        // grab search term from input
-                        Search.term = $scope.inputText;
-
-                        // reset input text to blank
-                        $scope.inputText = '';
-
-                        $location.path('/new/'+Search.term);
-
-                        // if not main, go to main with new sesh
-                        //if ($location.path() != '/main') {
-                        //    $location.path('/main');
-                        //    Sessions.new(Search.term);
-                        //}
-                        //
-                        //// did they click the button?
-                        //if (isButton) {
-                        //    // button = search results
-                        //    CurrentSession.handleTitleSearch({
-                        //        title: Search.term
-                        //    });
-                        //} else {
-                        //    // no button = attempt article
-                        //    CurrentSession.handleTitle({
-                        //        title: Search.term
-                        //    });
-                        //}
+                    if (term) {
+                        if ($scope.new_session) {
+                            $location.path('/new/' + term);
+                        } else {
+                            $scope.session.do_search(term)
+                        }
                     }
+
+                    $scope.inputText = '';
+
                 };
             }]);
 

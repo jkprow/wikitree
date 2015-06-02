@@ -5,9 +5,7 @@
             function($http, Articles, Categories, Searches) {
                 var search = {};
 
-                search.term = '';
-
-                search.getSuggestions = function (term) {
+                search.get_suggestions = function (term) {
 
                     console.log('Fetching suggestions...', term);
 

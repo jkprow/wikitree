@@ -15,15 +15,13 @@
 
                 // handle "toggle node pin" button
                 $scope.$on('request:graph:toggle_node_pin', function () {
-                    //var node = CurrentSession.getCurrentNode();
-                    var node = $scope.session.get_current_node();
+                    var node = $scope.session.get_current_node_id();
                     $scope.graph.toggleNodePin(node);
                 });
 
                 // handle "locate current node" button
                 $scope.$on('request:graph:locate_current_node', function () {
-                    //var node = CurrentSession.getCurrentNode();
-                    var node = $scope.session.get_current_node();
+                    var node = $scope.session.get_current_node_id();
                     $scope.graph.centerOnNode(node);
                 });
 
@@ -35,19 +33,14 @@
 
                 // handle model update (nodes + links)
                 $scope.$on('update:nodes+links', function () {
-
-                    console.log('did the thing');
-                	//var nodes = CurrentSession.getNodes().slice();
-                    //var links = CurrentSession.getLinks().slice();
-                    var nodes = $scope.session.nodes.slice();
-                    var links = $scope.session.links.slice();
+                    var nodes = $scope.session.get_nodes();
+                    var links = $scope.session.get_links();
                     $scope.graph.updateNodesAndLinks(nodes, links);
                 });
 
                 // handle model update (current node)
                 $scope.$on('update:currentnode', function () {
-                    //var node = CurrentSession.getCurrentNode();
-                    var node = $scope.session.get_current_node();
+                    var node = $scope.session.get_current_node_id();
                     $scope.graph.updateCurrentNode(node);
                 });
 
@@ -56,12 +49,7 @@
                  * Scope methods
                  */
 
-                //$scope.saveSession = function () {
-                //    Sessions.save();
-                //};
-
                 $scope.setCurrentNode = function (nodeId) {
-                    //CurrentSession.setCurrentNode(nodeId);
                     $scope.session.set_current_node_id(nodeId);
                 };
 

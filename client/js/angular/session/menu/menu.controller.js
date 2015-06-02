@@ -24,8 +24,6 @@
                 $scope.open = false;
 
                 $scope.goHome = function() {
-                    //Sessions.save();
-                    //window.location = '/welcome';
                     $location.path('/welcome');
                 };
 
@@ -54,10 +52,8 @@
                 };
 
                 $scope.removeCurrentNode = function () {
-                    //var node = CurrentSession.getCurrentNode();
-                    var node = $scope.session.get_current_node();
+                    var node = $scope.session.get_current_node_id();
                     if (window.confirm('Remove the article "' + node.title + '" from your session?')) {
-                        //CurrentSession.removeNode(node.uuid);
                         $scope.session.remove_node(node.uuid);
                     }
                 };
