@@ -2,14 +2,12 @@
     angular.module('wikitree.session').
 
         controller('session_controller',
-        ['$timeout'
-            , '$scope'
-            , '$rootScope'
+            ['$scope'
             , 'Search'
             , 'Sessions'
             , 'Utilities'
             , 'init_session'
-            , function ($timeout, $scope, $rootScope, Search, Sessions, Utilities, init_session) {
+            , function ($scope, Search, Sessions, Utilities, init_session) {
 
             var session = this;
             
@@ -206,7 +204,7 @@
                 next_stack = [];
                 current_node_id = nodeId;
 
-                $rootScope.$broadcast('update:currentnode');
+                $scope.$broadcast('update:currentnode');
             };
 
             /**
@@ -250,7 +248,7 @@
                 next_stack.push(current_node_id);
                 current_node_id = prev_stack.pop();
 
-                $rootScope.$broadcast('update:currentnode');
+                $scope.$broadcast('update:currentnode');
             };
 
             /**
@@ -262,7 +260,7 @@
                 prev_stack.push(current_node_id);
                 current_node_id = next_stack.pop();
 
-                $rootScope.$broadcast('update:currentnode');
+                $scope.$broadcast('update:currentnode');
             };
 
             /**
@@ -320,8 +318,8 @@
                 });
 
                 // alert the media
-                $rootScope.$broadcast('update:nodes+links');
-                $rootScope.$broadcast('update:currentnode');
+                $scope.$broadcast('update:nodes+links');
+                $scope.$broadcast('update:currentnode');
             };
 
             /**
