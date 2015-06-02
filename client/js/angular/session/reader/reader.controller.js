@@ -71,7 +71,7 @@
 
                 $scope.openSourceArticle = function () {
                     //var node = CurrentSession.getCurrentNode();
-                    var node = $scope.session.get_current_node();
+                    var node = $scope.session.get_current_node_id();
                     if (!(node && node.name)) return;
                     var url = '';
                     switch (node.type) {
@@ -109,7 +109,7 @@
 
                     // grab current node
                     //var node = CurrentSession.getCurrentNode();
-                    var node = $scope.session.get_current_node();
+                    var node = $scope.session.get_current_node_id();
 
                     // make sure we got node
                     if (!node) {
@@ -209,25 +209,6 @@
 
                             $scope.session.do_search(title, node.uuid, noSetCurrent);
 
-                            //if (isSearch) {
-                            //
-                            //    // skip to search
-                            //    CurrentSession.handleTitleSearch({
-                            //        title: title,
-                            //        noSetCurrent: noSetCurrent,
-                            //        sourceNodeId: node.uuid
-                            //    });
-                            //
-                            //} else {
-                            //
-                            //    // handle title
-                            //    CurrentSession.handleTitle({
-                            //        title: title,
-                            //        noSetCurrent: noSetCurrent,
-                            //        sourceNodeId: node.uuid
-                            //    });
-                            //
-                            //}
                         });
                     };
                 }
@@ -236,8 +217,7 @@
                  * Load article if there is one
                  */
 
-                //if (CurrentSession.getCurrentNode()) {
-                 if ($scope.session.get_current_node()) {
+                 if ($scope.session.get_current_node_id()) {
                     $scope.updateFrameNode();
                  }
 
