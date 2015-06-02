@@ -11,6 +11,9 @@
                         element[0],
                         scope
                     );
+                    scope.$broadcast('update:nodes+links');
+                    scope.$broadcast('update:currentnode');
+
                 }
             }
         }]);

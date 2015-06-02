@@ -427,7 +427,7 @@
                     nodes: nodes,
                     links: links
                 })
-            };
+            }
 
         }]);
 })();
