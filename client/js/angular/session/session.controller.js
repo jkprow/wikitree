@@ -2,12 +2,13 @@
     angular.module('wikitree.session').
 
         controller('session_controller',
-            ['$scope'
+            [ '$scope'
+            , '$routeParams'
             , 'Search'
             , 'Sessions'
             , 'Utilities'
             , 'init_session'
-            , function ($scope, Search, Sessions, Utilities, init_session) {
+            , function ($scope, $routeParams, Search, Sessions, Utilities, init_session) {
 
             var session = this;
             
@@ -51,6 +52,7 @@
 
             // handle graph update
             $scope.$on('update:nodes+links', function () {
+                console.log('saving nodes links');
                 save();
             });
 
@@ -155,6 +157,18 @@
                 }
             }
 
+            function removeLink (sourceId, targetId) {
+                if (!links_by_node_ids[sourceId]) return null;
+
+                var link = links_by_node_ids[sourceId][targetId];
+                if (!link) return null;
+                links = links.filter(function (l) {
+                    return l.uuid !== link.uuid
+                });
+                delete links_by_node_ids[sourceId][targetId];
+                delete links_by_id[link.uuid];
+            }
+
             /**
              * Add a link to the session
              * @param {Number} source_id ID of source node
@@ -172,7 +186,6 @@
                 links_by_node_ids[source_id][target_id] = link;
                 links_by_id[link.uuid] = link;
             }
-
 
             /**
              * Scope interface
@@ -223,6 +236,14 @@
                 return links.slice();
             };
 
+            session.getNode = function (node_id) {
+                return nodes_by_id[node_id];
+            };
+
+            session.getLink = function (link_id) {
+                return links_by_id[link_id]
+            }
+
             /**
              * Whether session history can be advanced
              * @returns {Boolean}
@@ -267,7 +288,7 @@
              * Remove a node
              * @param {Number} nodeId
              */
-            session.remove_node = function (nodeId) {
+            session.removeNode = function (nodeId) {
 
                 // validate existence
                 var node = nodes_by_id[nodeId];
@@ -285,15 +306,17 @@
                     });
 
                 // find a new current node
-                if (prev_stack.length) {
-                    // try previous first
-                    current_node_id = prev_stack.pop();
-                } else if (history.next_stack.length) {
-                    // how about next
-                    current_node_id = next_stack.pop();
-                } else {
-                    // uh oh
-                    current_node_id = null;
+                if (current_node_id === nodeId) {
+                    if (prev_stack.length) {
+                        // try previous first
+                        current_node_id = prev_stack.pop();
+                    } else if (history.next_stack.length) {
+                        // how about next
+                        current_node_id = next_stack.pop();
+                    } else {
+                        // uh oh
+                        current_node_id = null;
+                    }
                 }
 
                 // remove from nodes //////////////////////////////////////////
@@ -323,18 +346,20 @@
             };
 
             /**
-             * Remove a link
-             * @param {Number} source_node_id
-             * @param {Number} target_node_id
+             * Remove a pair of links
+             * @param {Number} linkId
              */
-            session.remove_link = function (source_node_id, target_node_id) {
-                var link = links_by_node_id[source_node_id][target_node_id];
-                if (!link) return null;
-                links = links.filter(function (l) {
-                    return l.uuid !== link.uuid
-                });
-                delete links_by_node_ids[sourceId][targetId];
-                delete links_by_id[link.uuid];
+
+            session.removeLinkPair = function (linkId) {
+                var link = links_by_id[linkId];
+                if (!link) return;
+                var nodeA = link.source;
+                var nodeB = link.target;
+                // remove both directions
+                removeLink(nodeA.uuid, nodeB.uuid);
+                removeLink(nodeB.uuid, nodeA.uuid);
+
+                $scope.$broadcast('update:nodes+links');
             };
 
             // the big one
@@ -344,14 +369,24 @@
              * @param {String} term search term
              * @param {Number} src_node_id ID of source node
              * @param {Boolean} no_set_current whether to set new node as current
+             * @param {Boolean} isSearch whether this should go straight to search results
              */
-            session.do_search = function (term, src_node_id, no_set_current) {
+            session.do_search = function (term, src_node_id, no_set_current/*, isSearch*/) {
                 var start_time = Date.now();
 
                 if (!(term && term.length)) return;
 
-                Search.findOrAddArticle(term).
-                    then(function (result) {
+                //var search;
+                //
+                //if (isSearch) {
+                //    console.log('search?');
+                //    search = Search.findOrAddSearch(term);
+                //} else {
+                //    search = Search.findOrAddArticle(term);
+                //}
+
+                /*search.then(function (result) {*/
+                Search.findOrAddArticle(term).then(function (result) {
 
                         console.log(result);
 
@@ -393,7 +428,6 @@
              */
             (function activate() {
                 if (init_session.new) {
-                    console.log('init new session', init_session);
                     session.do_search(init_session.start);
                     session.new = false;
                 }
@@ -426,7 +460,7 @@
                     next_stack: next_stack,
                     nodes: nodes,
                     links: links
-                })
+                });
             }
 
         }]);

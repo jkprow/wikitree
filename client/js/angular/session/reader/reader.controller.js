@@ -201,13 +201,13 @@
                 }
 
                 function makeTitleCallback(node) {
-                    return function (title, noSetCurrent, isSearch) {
+                    return function (title, noSetCurrent/*, isSearch*/) {
                         $scope.$apply(function () {
 
                             // user clicked an iframe title!
                             title = decodeURIComponent(title);
 
-                            $scope.session.do_search(title, node.uuid, noSetCurrent);
+                            $scope.session.do_search(title, node.uuid, noSetCurrent/*, isSearch*/);
 
                         });
                     };

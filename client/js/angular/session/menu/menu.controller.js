@@ -47,17 +47,6 @@
                     }
                 };
 
-                $scope.toggleNodePin = function () {
-                    $rootScope.$broadcast('request:graph:toggle_node_pin');
-                };
-
-                $scope.removeCurrentNode = function () {
-                    var node = $scope.session.get_current_node_id();
-                    if (window.confirm('Remove the article "' + node.title + '" from your session?')) {
-                        $scope.session.remove_node(node.uuid);
-                    }
-                };
-
                 $scope.locateCurrentNode = function () {
                     $rootScope.$broadcast('request:graph:locate_current_node');
                 };

@@ -54,20 +54,20 @@
                 };
 
                 $scope.removeNode = function (nodeId) {
-                    var node = CurrentSession.getNode(nodeId);
+                    var node = $scope.session.getNode(nodeId);
                     if (!node) return;
                     if (window.confirm('Remove the node "' + node.name + '" from your session?')) {
-                        CurrentSession.removeNode(node.uuid);
+                        $scope.session.removeNode(node.uuid);
                     }
                 };
 
                 $scope.removeLink = function (linkId) {
-                    var link = CurrentSession.getLink(linkId);
+                    var link = $scope.session.getLink(linkId);
                     if (!link) return;
                     var nodeA = link.source;
                     var nodeB = link.target;
                     if (window.confirm('Remove the link between "' + nodeA.name + '" and "' + nodeB.name + '" from your session?')) {
-                        CurrentSession.removeLink(link.uuid);
+                        $scope.session.removeLinkPair(link.uuid);
                     }
                 };
 

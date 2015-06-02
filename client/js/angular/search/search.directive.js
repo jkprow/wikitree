@@ -9,11 +9,7 @@
                 link: function($scope, $element, $attributes) {
                     $scope.large = $attributes.large;
                     $scope.new_session = $attributes.newSession;
-                }//,
-                //scope: {
-                //    large: '@',
-                //    newSession: '@'
-                //}
+                }
             }
         }]);
 

@@ -27,6 +27,22 @@
                         }
                     }
 
+                    //if (term) {
+                    //    if ($scope.new_session) {
+                    //        if (isButton) {
+                    //            $location.path('/new/' + term + '/true');
+                    //        } else {
+                    //            $location.path('/new/' + term);
+                    //        }
+                    //    } else {
+                    //        if (isButton) {
+                    //            $scope.session.do_search(term, null, null, true);
+                    //        } else {
+                    //            $scope.session.do_search(term);
+                    //        }
+                    //    }
+                    //}
+
                     $scope.inputText = '';
 
                 };

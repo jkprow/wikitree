@@ -16,11 +16,7 @@
                         prev_stack:        [],
                         next_stack:        [],
                         nodes:             [],
-                        //nodes_by_id:       {},
-                        //nodes_by_name:     {},
-                        links:             []//,
-                        //links_by_id:       {},
-                        //links_by_node_ids: {}
+                        links:             []
                     }
                 }
 
@@ -55,26 +51,15 @@
                     }
                 });
 
-                //Sessions.new = function(name) {
-                //    Sessions.active = 0;
-                //
-                //    var newSession = new Session();
-                //    Sessions.index.unshift(new SessionIndex(newSession, name));
-                //
-                //    localStorageService.set(newSession.uuid, newSession);
-                //    localStorageService.set('index', Sessions.index);
-                //    localStorageService.set('active', Sessions.active);
-                //
-                //    CurrentSession.clearState();
-                //};
-
                 Sessions.is_new = function () {
+                    // any existing sessions?
                     if (Sessions.index.length !== 0) {
-                        var uuid = Sessions.index[Sessions.active].uuid;
-                        $location.path('/session/'+uuid);
-                        return false;
-                    } else {
-                        return true;
+                        var active_session = Sessions.index[Sessions.active];
+
+                        // pull up the active one
+                        if (active_session) {
+                            $location.path('/session/' + active_session.uuid);
+                        }
                     }
                 };
 
@@ -95,18 +80,6 @@
                     return session;
                 };
 
-                //Sessions.save = function() {
-                //    var currentSessionUUID = Sessions.index[Sessions.active].uuid;
-                //    var currentSession = localStorageService.get(currentSessionUUID);
-                //
-                //    currentSession.data = CurrentSession.exportState();
-                //    localStorageService.set(currentSessionUUID, currentSession);
-                //
-                //    Sessions.index[Sessions.active].date = Date.now();
-                //    localStorageService.set('index', Sessions.index);
-                //    localStorageService.set('active', Sessions.active);
-                //};
-
                 Sessions.save = function (uuid, data) {
                     var session = localStorageService.get(uuid);
 
@@ -116,26 +89,17 @@
                     Sessions.index[Sessions.active].date = Date.now();
                     localStorageService.set('index', Sessions.index);
 
-                Sessions.restore = function(idx) {
-                    Sessions.active = idx;
-                    localStorageService.set('active', Sessions.active);
-                    console.log('Sessions.restore', idx, Sessions.index[idx]);
-
-                    var restoredSessionUUID = Sessions.index[idx].uuid;
-                    var restoredSession = localStorageService.get(restoredSessionUUID);
                     localStorageService.set(uuid, session);
                 };
 
                 //Sessions.restore = function(idx) {
                 //    Sessions.active = idx;
                 //    localStorageService.set('active', Sessions.active);
-                //    console.log('clicked', idx, Sessions.index[idx]);
+                //    console.log('Sessions.restore', idx, Sessions.index[idx]);
                 //
                 //    var restoredSessionUUID = Sessions.index[idx].uuid;
                 //    var restoredSession = localStorageService.get(restoredSessionUUID);
-                //
-                //    CurrentSession.clearState();
-                //    CurrentSession.importState(restoredSession);
+                //    localStorageService.set(uuid, session);
                 //};
 
                 Sessions.restore = function (uuid) {
@@ -182,18 +146,6 @@
                         Sessions.active--;
                     }
                 };
-
-                /**
-                 * Save events
-                 */
-
-                //$(window).on('beforeunload', function () {
-                //    Sessions.save();
-                //});
-                //
-                //$rootScope.$on('update:nodes+links', function () {
-                //    Sessions.save();
-                //});
 
                 return Sessions;
         }]);
